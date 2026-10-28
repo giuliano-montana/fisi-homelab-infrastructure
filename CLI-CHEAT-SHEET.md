@@ -43,7 +43,7 @@ Mit diesen Befehlen kontrolliere ich den Zustand der isolierten App-Boxen (Conta
 *   `docker ps`
     *   **Erklärung:** Zeigt eine Tabelle aller aktuell **laufenden** Docker-Container auf dem Server an. Die Spalte *NAMES* verrät mir die exakten Bezeichnungen der aktiven Microservices.
 *   `docker compose up -d`
-    *   **Erklärung:** Liest die `docker-compose.yml` im aktuellen Ordner aus, lädt fehlende Software-Images aus dem Docker Hub ("Appstore") herunter und startet das gesamte Container-Team im Hintergrund. Das `-d` (*detached mode*) sorgt dafür, dass mein Terminal danach sofort wieder für neue Befehle frei wird.
+    *   **Erklärung:** Liest die `docker-compose.yml` im aktuellen Ordner aus, lädt fehlende Software-Images aus dem Docker Hub herunter und startet das gesamte Container-Team im Hintergrund. Das `-d` (*detached mode*) sorgt dafür, dass mein Terminal danach sofort wieder für neue Befehle frei wird.
 *   `docker compose down`
     *   **Erklärung:** Stoppt und löscht alle Container, die in der lokalen `docker-compose.yml` definiert sind, **rückstandslos**. Der Server ist danach wieder komplett sauber, während die persistenten Daten in den gesharten Volumes sicher auf der Festplatte liegen bleiben.
 
