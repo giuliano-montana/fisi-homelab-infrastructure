@@ -31,7 +31,7 @@ Da ich auf Servern keine grafische Oberfläche (GUI) habe, editiere ich Konfigur
     *   **Erklärung:** Öffnet oder erstellt eine Textdatei im eingebauten Linux-Texteditor *Nano*.
 *   **Wichtige Tastatur-Shortcuts in Nano:**
     *   `Strg + K` = Löscht die aktuelle Zeile komplett (praktisch, um Dateien schnell zu leeren).
-    *   `Strg + O` -> danach `Enter` drücken = Speichert (*Write Out*) die Datei ab.
+    *   `Strg + O` -> danach `Enter` drücken = Speichert die Datei ab.
     *   `Strg + X` = Beendet den Nano-Editor und kehrt zur normalen Kommandozeile zurück.
 
 ---
