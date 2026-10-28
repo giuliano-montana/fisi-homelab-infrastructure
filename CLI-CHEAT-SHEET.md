@@ -12,6 +12,12 @@ Diese Befehle nutze ich, um mich im Terminal durch das Dateisystem meines Proxmo
     *   **Bedeutung:** *Make Directory* (Ordner erstellen).
     *   **Erklärung:** Erstellt einen neuen, leeren Ordner. Der Schalter `-p` ist der Sicherheitsmodus: Er sorgt dafür, dass auch alle übergeordneten Ordner im Pfad automatisch mit erstellt werden, falls sie noch nicht existieren.
     *   **Beispiel:** `mkdir -p ~/homelab/nextcloud`
+*   `pwd`
+    *   **Bedeutung:** *Print Working Directory* (Arbeitsverzeichnis anzeigen).
+    *   **Erklärung:** Spuckt den exakten Pfad aus, in dem mein Terminal sich gerade befindet. Lebenswichtig, um vor einem Docker-Start zu prüfen, in welchem Projektordner man steht.
+*   `ls -la`
+    *   **Bedeutung:** *List Extended* (Detaillierte Liste).
+    *   **Erklärung:** Listet alle Dateien und Ordner im aktuellen Verzeichnis auf – inklusive der versteckten Systemdateien (die mit einem Punkt beginnen). Zeigt mir sofort, ob eine `docker-compose.yml` im Ordner existiert.   
 *   `cd <pfad>`
     *   **Bedeutung:** *Change Directory* (Ordner wechseln).
     *   **Erklärung:** Bewegt mich virtuell in den angegebenen Ordner hinein. Das Zeichen `~` (Tilde) springt dabei immer direkt in mein Benutzer-Heimatverzeichnis.
@@ -47,3 +53,12 @@ Mit diesen Befehlen kontrolliere ich den Zustand der isolierten App-Boxen (Conta
 *   `docker compose down`
     *   **Erklärung:** Stoppt und löscht alle Container, die in der lokalen `docker-compose.yml` definiert sind, **rückstandslos**. Der Server ist danach wieder komplett sauber, während die persistenten Daten in den gesharten Volumes sicher auf der Festplatte liegen bleiben.
 
+---
+
+## 4. Wichtige Architektur-Erkenntnisse (Docker Networking & Storage)
+
+*   **Das Ordner-Prinzip bei Compose:** Der Befehl `docker compose up -d` sucht *immer* nur im aktuellen Ordner nach der Konfigurationsdatei. Man kann problemlos mehrere `docker-compose.yml`-Dateien auf dem Server haben, solange sie in unterschiedlichen Verzeichnissen liegen. Sie behindern sich gegenseitig nicht.
+*   **Named Volumes vs. Bind Mounts:** 
+    *   *Named Volumes* (z. B. `- nextcloud-data:/var/www/html`) überlassen Docker die komplette Rechteverwaltung auf der Festplatte. Das ist bei unpriviligierten Proxmox-LXCs zwingend notwendig, um *Permission Denied*-Fehler (Rechtekonflikte durch das unpriviligierte UID-Mapping) bei Datenbanken und Web-Apps automatisch zu verhindern. Zudem müssen sie am Ende der Datei im globalen `volumes:`-Block deklariert (angemeldet) werden.
+    *   *Bind Mounts* (z. B. `- ./data:/data`) verweisen auf einen festen, sichtbaren Pfad. Gut für einfache Konfigurationsordner, die man selbst als Administrator häufig händisch mit Nano bearbeiten möchte.
+*   **Unattended Isolation (Passwörter im Code):** Docker-Container starten vollautomatisch ohne menschliche Eingabe. Daher müssen Umgebungsvariablen (`environment:`) wie Passwörter und Datenbanknamen im Vorfeld fest im Code definiert werden, damit die isolierten App-Boxen beim ersten Start automatisch die Tabellen anlegen und sich miteinander vernetzen können.
