@@ -44,6 +44,14 @@ Um die Stabilität meines Heimnetzwerks zu garantieren, ist das Lab konsequent n
 
 ## 3. Design-Entscheidungen & Erkenntnisse (Lessons Learned)
 
+* **Webserver-Integration (Image-Wahl):** 
+  Ursprünglich wurde die Nextcloud im ressourcensparenden `fpm-alpine`-Image aufgesetzt. Da PHP-FPM (Port 9000) jedoch rein serverseitigen Code interpretiert und statische Assets (CSS/JS) nicht nativ ausliefern kann, führte dies ohne komplexe Volume-Freigaben zu Darstellungsfehlern ("File not found" / fehlende Styles). Die Entscheidung fiel auf das Standard-Image `nextcloud:latest` (Apache-basiert), da dieses die Assets nativ über Port 80 verarbeitet und reibungslos mit dem Reverse Proxy zusammenspielt.
+  
+* **Netzwerk-Kapselung & Docker-Routing:**
+  Docker-Compose isoliert Container-Stacks standardmäßig in eigenen Bridge-Netzwerken. Damit der *Nginx Proxy Manager* Traffic an Nextcloud weiterleiten kann, wurde ein globales, externes Netzwerk (`proxy-network`) per CLI erstellt und beide Applikationen darin verknüpft. Das sorgt für strikte Diensttrennung: Die sensible MariaDB-Datenbank bleibt im isolierten internen Netz isoliert und ist für den Proxy physisch nicht erreichbar.
+
+* **Fehlerquelle DNS-Caching (Layer 3 vs. Layer 7):**
+  Ein Konfigurationsfehler im lokalen DNS (Pi-hole) zeigte, wie essenziell die Namensauflösung im Homelab ist. Zeigt eine Domain (`cloud.lan`) auf die falsche Host-IP, erreicht die Anfrage den Reverse Proxy gar nicht erst. Alle lokalen Dienste müssen konsistent auf die IP des Proxys zeigen, damit dieser das zustandslose Routing anhand des HTTP-Host-Headers (Layer 7) übernehmen kann.
 
 ## 🛠️ Mein Linux & Docker Spickzettel
 
