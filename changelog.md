@@ -25,7 +25,7 @@ Nach der gestrigen Basis-Installation von Nextcloud im Docker-Container sollte d
 
 ### 3. Durchgeführte Maßnahmen & Lösung (Fix)
 
-1. **DNS-Korrektur:** Die IP-Adresse für `cloud.lan` im Pi-hole korrigiert und konsistent auf die IP des Reverse Proxys (`192.168.2.3`) umgebogen.
+1. **DNS-Korrektur:** Die IP-Adresse für `cloud.lan` im Pi-hole korrigiert und konsistent auf die IP des Reverse Proxys (`192.168.2.X`) umgebogen.
 2. **Netzwerk-Kapselung:** Ein globales Docker-Netzwerk (`proxy-network`) per CLI erstellt und die Container `nginx-proxy-manager-app-1` und `nextcloud-app` nachträglich hineingehängt.
 3. **Optimierung der Image-Wahl:** Umstellung in der `docker-compose.yml` vom komplexen FPM-Image auf das Standard-Web-Image (`nextcloud:latest`). Dieses bringt einen integrierten Apache-Webserver mit, der statische Assets nativ über Port 80 verarbeitet.
 4. **Bereinigung der Dateirechte:** Vollständiger Reset der korrupten Volume-Rechte mittels `docker compose down -v` und anschließender Neuinitialisierung über `docker compose up -d`. Dadurch wurden die Named Volumes mit den korrekten Berechtigungen neu aufgebaut.
