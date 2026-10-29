@@ -65,5 +65,5 @@ Da ich im Terminal viele neue Befehle lerne, führe ich ein eigenständiges, for
 
 In der IT-Systemintegration ist eine saubere Dokumentation von Änderungen und Fehlern das A und O. Deshalb führe ich ein fortlaufendes Betriebstagebuch. Hier halte ich fest, welche Probleme in meinem Lab aufgetreten sind, wie ich die Logfiles analysiert habe und wie die technische Lösung aussah:
 
--> **[Hier geht es zu meinem Changelog und den täglichen Logs](/changelog/)**
+-> **[Hier geht es zu meinem Changelog und den täglichen Logs](/changelog.md/)**
 
