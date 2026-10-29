@@ -57,4 +57,4 @@ Um die Stabilität meines Heimnetzwerks zu garantieren, ist das Lab konsequent n
 
 Da ich im Terminal viele neue Befehle lerne, führe ich ein eigenständiges, fortlaufendes Logbuch. Um diese Readme übersichtlich zu halten, habe ich alle Befehle ausgelagert:
 
-👉 **[Hier geht es zu meinem Linux & Docker CLI Spickzettel (CLI-CHEAT-SHEET.md)](CLI-CHEAT-SHEET.md)**
+-> **[Hier geht es zu meinem Linux & Docker CLI Spickzettel (CLI-CHEAT-SHEET.md)](CLI-CHEAT-SHEET.md)**
