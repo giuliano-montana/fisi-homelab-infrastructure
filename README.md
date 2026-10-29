@@ -53,7 +53,7 @@ Um die Stabilität meines Heimnetzwerks zu garantieren, ist das Lab konsequent n
 * **Fehlerquelle DNS-Caching (Layer 3 vs. Layer 7):**
   Ein Konfigurationsfehler im lokalen DNS (Pi-hole) zeigte, wie essenziell die Namensauflösung im Homelab ist. Zeigt eine Domain (`cloud.lan`) auf die falsche Host-IP, erreicht die Anfrage den Reverse Proxy gar nicht erst. Alle lokalen Dienste müssen konsistent auf die IP des Proxys zeigen, damit dieser das zustandslose Routing anhand des HTTP-Host-Headers (Layer 7) übernehmen kann.
 
-## 🛠️ Mein Linux & Docker Spickzettel
+## Mein Linux & Docker Spickzettel
 
 Da ich im Terminal viele neue Befehle lerne, führe ich ein eigenständiges, fortlaufendes Logbuch. Um diese Readme übersichtlich zu halten, habe ich alle Befehle ausgelagert:
 
