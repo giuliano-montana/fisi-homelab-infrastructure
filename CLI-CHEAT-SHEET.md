@@ -1,4 +1,4 @@
-# 🛠️ Mein persönlicher Linux & Docker CLI Spickzettel
+# Mein persönlicher Linux & Docker CLI Spickzettel
 
 Dieses Dokument dient als meine persönliche Wissensdatenbank während meiner Vorbereitung auf die FISI-Umschulung. Hier halte ich alle Terminal-Befehle fest, die ich in der Praxis gelernt habe, um sie dauerhaft zu verinnerlichen.
 
