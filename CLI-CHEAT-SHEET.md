@@ -53,6 +53,22 @@ Mit diesen Befehlen kontrolliere ich den Zustand der isolierten App-Boxen (Conta
 *   `docker compose down`
     *   **Erklärung:** Stoppt und löscht alle Container, die in der lokalen `docker-compose.yml` definiert sind, **rückstandslos**. Der Server ist danach wieder komplett sauber, während die persistenten Daten in den gesharten Volumes sicher auf der Festplatte liegen bleiben.
 
+* `docker network create <netzwerk_name>`
+  * **Bedeutung:** Docker-Netzwerk erstellen.
+  * **Erklärung:** Erstellt ein eigenständiges, virtuelles Switch-Netzwerk, um Container aus unterschiedlichen Docker-Compose-Dateien miteinander zu verbinden.
+
+* `docker network connect <netzwerk_name> <container_name>`
+  * **Bedeutung:** Container im laufenden Betrieb an ein Netzwerk anbinden.
+  * **Erklärung:** Verknüpft eine neue virtuelle Netzwerkkarte mit dem Container. Unverzichtbar, um bestehende Container nachträglich für den Reverse Proxy erreichbar zu machen.
+
+* `docker network inspect <netzwerk_name>`
+  * **Bedeutung:** Netzwerk-Details analysieren.
+  * **Erklärung:** Spuckt die genauen IPs und verbundenen Container eines Netzwerks im JSON-Format aus. Perfekt für das Debugging auf Layer 3, um Konnektivität zu prüfen.
+
+* `docker logs --tail <zeilen_anzahl> <container_name>`
+  * **Bedeutung:** Letzte Log-Einträge anzeigen.
+  * **Erklärung:** Begrenzt die Fehlerausgabe auf die neuesten Zeilen. Mit dem Zusatz `-f` (`--follow`) wird der Log-Stream live im Terminal verfolgt.
+
 ---
 
 ## 4. Wichtige Architektur-Erkenntnisse (Docker Networking & Storage)
