@@ -26,6 +26,11 @@ Diese Befehle nutze ich, um mich im Terminal durch das Dateisystem meines Proxmo
     *   **Bedeutung:** *Copy* (Datei kopieren).
     *   **Erklärung:** Erstellt eine exakte Kopie einer Datei. Perfekt, um vor Änderungen ein Backup anzulegen.
     *   **Beispiel:** `cp docker-compose.yml docker-compose.yml.bak`
+* `find <pfad> -name "<dateiname>" 2>/dev/null`
+    * **Bedeutung:** Dateisystem nach bestimmten Dateien durchsuchen.
+    * **Erklärung:** Durchsucht ab dem angegebenen Pfad (z. B. `/` für die ganze Festplatte) alle Ordner. `2>/dev/null` blendet Fehlermeldungen für Ordner aus, auf die man keine Zugriffsrechte hat.
+    * **Beispiel:** `find / -name "config.php" 2>/dev/null`
+
 
 ---
 
@@ -53,6 +58,16 @@ Mit diesen Befehlen kontrolliere ich den Zustand der isolierten App-Boxen (Conta
 *   `docker compose down`
     *   **Erklärung:** Stoppt und löscht alle Container, die in der lokalen `docker-compose.yml` definiert sind, **rückstandslos**. Der Server ist danach wieder komplett sauber, während die persistenten Daten in den gesharten Volumes sicher auf der Festplatte liegen bleiben.
 
+* `docker inspect -f '{{ json .Mounts }}' <container_name>`
+    * **Bedeutung:** Docker-Volumes und Speicherpfade auslesen.
+    * **Erklärung:** Zeigt an, wo ein Container seine Daten auf dem echten Server (Host) dauerhaft speichert. Wichtig vor dem Löschen von Containern, um Datenverlust zu vermeiden.
+    * **Beispiel:** `docker inspect -f '{{ json .Mounts }}' nextcloud-app`
+
+* `docker exec -it <container_name> <befehl>`
+    * **Bedeutung:** Befehle direkt *innerhalb* eines laufenden Containers ausführen.
+    * **Erklärung:** Erlaubt es, in die isolierte Umgebung des Containers hineinzuspringen (z. B. mit `bash` oder `sh`), um dort direkt Diagnosen durchzuführen.
+    * **Beispiel:** `docker exec -it nextcloud-app bash`
+
 * `docker network create <netzwerk_name>`
   * **Bedeutung:** Docker-Netzwerk erstellen.
   * **Erklärung:** Erstellt ein eigenständiges, virtuelles Switch-Netzwerk, um Container aus unterschiedlichen Docker-Compose-Dateien miteinander zu verbinden.
@@ -78,3 +93,5 @@ Mit diesen Befehlen kontrolliere ich den Zustand der isolierten App-Boxen (Conta
     *   *Named Volumes* (z. B. `- nextcloud-data:/var/www/html`) überlassen Docker die komplette Rechteverwaltung auf der Festplatte. Das ist bei unpriviligierten Proxmox-LXCs zwingend notwendig, um *Permission Denied*-Fehler (Rechtekonflikte durch das unpriviligierte UID-Mapping) bei Datenbanken und Web-Apps automatisch zu verhindern. Zudem müssen sie am Ende der Datei im globalen `volumes:`-Block deklariert (angemeldet) werden.
     *   *Bind Mounts* (z. B. `- ./data:/data`) verweisen auf einen festen, sichtbaren Pfad. Gut für einfache Konfigurationsordner, die man selbst als Administrator häufig händisch mit Nano bearbeiten möchte.
 *   **Unattended Isolation (Passwörter im Code):** Docker-Container starten vollautomatisch ohne menschliche Eingabe. Daher müssen Umgebungsvariablen (`environment:`) wie Passwörter und Datenbanknamen im Vorfeld fest im Code definiert werden, damit die isolierten App-Boxen beim ersten Start automatisch die Tabellen anlegen und sich miteinander vernetzen können.
+*   * **Docker-internes DNS & Namensauflösung:** Innerhalb eines benutzerdefinierten Docker-Netzwerks (Bridge) läuft ein eigener DNS-Dienst. Container können sich dadurch direkt über ihren vergebenen `container_name` (z. B. `http://nextcloud-app:80`) gegenseitig anfunken. Man muss und sollte keine fehleranfälligen IP-Adressen der Container oder des Host-Systems fest verbauen.
+* **Das "Trusted Domains"-Prinzip (Sicherheitsfunktion):** Viele moderne Web-Apps (wie Nextcloud) besitzen einen integrierten Schutz vor unerlaubten Zugriffen. Sie akzeptieren Anfragen nur dann mit einem erfolgreichen Statuscode `200 OK`, wenn die aufgerufene Adresse (egal ob Domain wie `cloud.lan` oder interner Containername wie `nextcloud-app`) explizit in der Konfigurationsdatei (`config.php`) als vertrauenswürdig hinterlegt ist. Fehlt der Eintrag, blockiert die App mit einem Fehler `400 Bad Request`.
