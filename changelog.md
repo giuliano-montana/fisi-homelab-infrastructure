@@ -34,3 +34,29 @@ Nach der gestrigen Basis-Installation von Nextcloud im Docker-Container sollte d
 
 ### 4. Ergebnis & Fazit
 Die Nextcloud ist nun erfolgreich, stabil und vollformatig unter `http://cloud.lan` im lokalen Netzwerk erreichbar. Durch den Wechsel auf das Apache-Image konnte der fehleranfällige Custom-Nginx-Code im Advanced-Tab des NPM komplett entfernt werden. Das System läuft stabil auf der unprivilegierten LXC-Infrastruktur und schont die restriktiven Hardware-Ressourcen (4 GB RAM) des Hosts optimal.
+
+# Changelog | 03. November 2026
+
+**Thema: Netzwerk-Isolation von Uptime Kuma & Fehlerbehebung der Nextcloud-Überwachung**
+
+## 1. Ausgangssituation & Zielsetzung
+Nachdem Nextcloud erfolgreich im lokalen Netzwerk bereitgestellt wurde, sollte ein Überwachungstool (**Uptime Kuma**) eingerichtet werden. Ziel war es, den Status der Nextcloud kontinuierlich zu überwachen. Uptime Kuma lief zuvor isoliert im sogenannten `host`-Netzwerkmodus und sollte aus Sicherheits- und Stabilitätsgründen in das gemeinsame Docker-Netzwerk integriert werden, um direkt mit den anderen Containern zu kommunizieren.
+
+## 2. Aufgetretene Probleme & Technische Analyse
+
+* **Problem 1: Container-Namensauflösung fehlgeschlagen (Fehlermeldung: `ENOTFOUND`)**
+    * **Symptom:** Nach dem Wechsel von Uptime Kuma in das Docker-Netzwerk konnte das Tool die lokale Domain `cloud.lan` nicht mehr finden.
+    * **Analyse:** Uptime Kuma hatte innerhalb des isolierten Docker-Netzwerks keinen Zugriff auf den lokalen DNS-Server (Pi-hole). Dadurch konnte die Domain `cloud.lan` nicht in eine IP-Adresse übersetzt werden. Ein Versuch, den Nginx Proxy Manager direkt über dessen Containernamen anzusprechen, scheiterte, da zusätzliche HTTP-Header (Host-Header) zu Konflikten bei der internen Adresssuche des Tools führten.
+
+* **Problem 2: Sicherheitsblockade durch Nextcloud (Fehlermeldung: `Status Code 400 - Bad Request`)**
+    * **Symptom:** Als Uptime Kuma die Nextcloud direkt über den internen Containernamen (`http://nextcloud-app:80`) ansprach, verweigerte Nextcloud den Zugriff.
+    * **Analyse:** Nextcloud besitzt eine integrierte Sicherheitsfunktion. Sie akzeptiert nur Anfragen von Domains oder Geräten, die explizit in ihrer Konfigurationsdatei als vertrauenswürdig hinterlegt sind. Da der interne Containername `nextcloud-app` dort fehlte, stufte Nextcloud die Anfrage als potenziell gefährlich ein und blockierte sie.
+
+## 3. Durchgeführte Maßnahmen & Lösung (Fix)
+
+1. **Netzwerk-Bereinigung & Daten-Absicherung:** Vor dem Umzug wurde geprüft, ob Uptime Kuma seine Daten dauerhaft auf der Festplatte des Servers speichert (über einen sogenannten Volume-Mount unter `/opt/uptime-kuma`). Der alte Container wurde sicher gelöscht und im selben Docker-Netzwerk wie Nextcloud neu gestartet, ohne dass Daten verloren gingen.
+2. **Direkte Container-Verbindung eingerichtet:** In Uptime Kuma wurde die externe Domain durch den direkten internen Containernamen (`http://nextcloud-app:80`) ersetzt. Das Feld für zusätzliche HTTP-Header wurde komplett geleert, um DNS-Fehler im Container zu verhindern.
+3. **Erweiterung der vertrauenswürdigen Domains (Trusted Domains):** Über das Terminal wurde die Konfigurationsdatei der Nextcloud (`config.php`) im Docker-Volume geöffnet. Der interne Containername `nextcloud-app` wurde manuell in die Liste der `trusted_domains` eingetragen.
+
+## 4. Ergebnis & Fazit
+Die Überwachung läuft nun perfekt. Uptime Kuma erreicht Nextcloud jetzt auf dem direktesten und sichersten Weg komplett intern über das Docker-Netzwerk. Nextcloud beantwortet die Anfragen erfolgreich mit dem Statuscode `200 OK` (Grün). Durch diese Architektur wird der externe Netzwerkverkehr geschont, und der Monitor bleibt selbst dann aktiv, wenn die lokale DNS-Auflösung (Pi-hole) einmal ausfallen sollte.
