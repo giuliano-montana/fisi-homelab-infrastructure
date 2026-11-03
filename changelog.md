@@ -1,4 +1,4 @@
-# Chngelog | 29. Oktober 2026
+# Changelog | 29. Oktober 2026
 
 ## Thema: Nextcloud-Deployment & Reverse-Proxy-Integration
 
