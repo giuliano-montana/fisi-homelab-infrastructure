@@ -33,7 +33,7 @@ Um die Stabilität meines Heimnetzwerks zu garantieren, ist das Lab konsequent n
 
 ### Bereich B: Application Infrastructure (`srv-docker-apps`)
 * **Dienst:** Docker-Engine & Docker-Compose
-* **Konzept:** Hier befindet sich meine "Spielwiese" für Web-Anwendungen. Sollte ein Docker-Container aufgrund von Fehlkonfigurationen oder Ressourcenmangel abstürzen, bleibt der LXC-Container für die Core-Infrastruktur (`pihole-dns`) davon komplett unberührt. Das Internet im Haus läuft stabil weiter.
+* **Konzept:** Hier befindet sich meine Web-Anwendungen. Sollte ein Docker-Container aufgrund von Fehlkonfigurationen oder Ressourcenmangel abstürzen, bleibt der LXC-Container für die Core-Infrastruktur (`pihole-dns`) davon komplett unberührt. Das Internet im Haus läuft stabil weiter.
 
 **Die installierten Docker-Container:**
 * **Nginx Proxy Manager:** Der einzige Container, der die Web-Ports (80/443) belegt. Er nimmt Anfragen an und leitet sie intern per Domainname weiter.
