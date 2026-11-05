@@ -24,6 +24,7 @@ Nachdem Nextcloud erfolgreich im lokalen Netzwerk bereitgestellt wurde, sollte e
 ## 4. Ergebnis & Fazit
 Die Überwachung läuft nun perfekt. Uptime Kuma erreicht Nextcloud jetzt auf dem direktesten und sichersten Weg komplett intern über das Docker-Netzwerk. Nextcloud beantwortet die Anfragen erfolgreich mit dem Statuscode `200 OK` (Grün). Durch diese Architektur wird der externe Netzwerkverkehr geschont, und der Monitor bleibt selbst dann aktiv, wenn die lokale DNS-Auflösung (Pi-hole) einmal ausfallen sollte.
 
+
 # Changelog | 29. Oktober 2026
 
 ## Thema: Nextcloud-Deployment & Reverse-Proxy-Integration
