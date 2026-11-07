@@ -1,3 +1,32 @@
+# Changelog | 07. November 2026
+
+**Thema: Automatisierung einer Backup-Pipeline (Anwendungs- und Infrastrukturkonsistent)**
+
+## 1. Ausgangssituation & Zielsetzung 
+Nachdem der Docker-Stack mit Nextcloud und MariaDB stabil lief, fehlte eine automatisierte, ausfallsichere Disaster-Recovery-Strategie. Ziel war es, ein tägliches Backup des Docker-LXC-Containers (`VM 101`) auf dem Proxmox-Host einzurichten, ohne für Ausfallzeiten der Dienste zu sorgen. Besondere Priorität hatte die absolute Datenintegrität der relationalen MariaDB-Datenbank, um Tabellenkorruption beim Wiederherstellen zu verhindern.
+
+**Zusatz-Ziel (System-Härtung):** Da der LXC-Container standardmäßig nur über den allmächtigen `root`-Account verfügte, sollte im selben Zuge die Netzwerksicherheit erhöht werden. Um den Best-Practice-Standard der IT-Sicherheit (*Principle of Least Privilege*) zu erfüllen, sollte ein passwortgeschützter Standard-Benutzer für die tägliche Administration über SSH eingerichtet werden, um direkte Root-Logins über das Netzwerk vollständig zu unterbinden.
+
+## 2. Aufgetretene Probleme & Technische Analyse
+* **Problem 1: Crash-Inkonsistenz bei reinen Hypervisor-Snapshots**
+    * **Symptom:** Ein reiner Proxmox-Snapshot friert nur die Festplattensektoren ein.
+    * **Analyse:** Datenbanken (MarieDB) halten aktive Transaktionen und Indizes im flüchtigen RAM. Wird die Festplatte "mid-light" eingefrorem. fehlen diese Daten im Snapshot. Das Backup wäre im Ernstfall korrupt ("Crash-Inkonsistent").
+* **Problem 2: Virtualisierungs-Ebenen verwechselt (Fehlermeldung: Permission Denied)**
+    * **Symptom:** Der SSH-Loginversuch mit `ssh giuliano@192.168.2.3` vom Desktop schlug fehl.
+    * **Analyse:** Der Benutzer wurde fälschlicherweise auf dem übergeordneten Proxmox-Host (PVE) erstellt. Der isolierte LXC-Container hatte diesen Benutzernamen nicht in seiner lokalen Systemdatenbank (`/etc/passwd`). Da der Container die Identität nicht kannte, verweigerte er den Zugriff. Zudem fehlte dem Container die administrative Zusatz-Software `sudo`, um Befehle zu eskalieren.
+* **Problem 3: CLI-Sonderzeichen-Konflikt (Fehlermeldung: Access Denied 1045)**
+    * **Symptom:** Der manuelle Testbefehl von `mysqldump`schlug fehl schlug fehl obwogl das Passwort richtig eingegeben wurde.
+    * **Analyse:** Das Datenbank Passwort enthielt die Satzzeichen `.,`(Komma/Punkt). Der Linux-Kommandozeileninterpreter (Bash) interpretierte das Komma als Trennzeichen (Delimiter) und schnitt das Passwort beim Übergeben an den Docker-Container ab.
+
+## 3. Durchgeführte Maßnahmen und Lösungen
+1. **Benutzer-Härtung (Least Privilege):** Per `pct enter` den LXC-Container betreten und einen dedizierten User (`giuliano`) angelegt. Sudo nachinstalliert (`apt install sudo`) und den User der Sudo-Gruppe zugewiesen, um den unsicheren SSH-Root-Zugriff netzwerkweit komplett zu blockieren.
+2. **Korrektur der Hostnamen-Auflösung:** Den internen LXC-Hostnamen permanent auf `srv-docker-apps` (vorher `monitoring`, da zu dem Zeitpunkt nur uptime-kuma installiert war) geändert, die `/etc/hosts` angepasst und damit den Sudo-Warnfehler behoben.
+3. **Erstellung des anwendungskonsitenten DB-Dumps:** Lösung des Sonderzeichen-Konflikts durch das Kapseln der Ausführung in einer Docker-internen Shell (`sh -c`). Das Passwort wird dabei verschlüsselt als Umgebungsvariable (`$MYSQL_ROOT_PASSWORD`) direkt aus dem sicheren RAM-Speicher des Containers ausgelesen.
+4. **Skript-Automatisierung & Cron-Scheduling:** Erstellung eines Master-Bash-Scripts (`/usr/local/bin/backup-pipeline.sh`) auf dem Proxmox-Host. Das Skript triggert erst den DB-Dump im Container und führt danach den ZSTD-komprimierten Host-Snapshot (`vzdump 101`) mit einer automatischen Pruning-Retention (`keep-last=3`) aus. Eingebunden in die System-Crontab für das nächtliche Backup-Fenster um 03:00 Uhr.
+
+## 4. Ergebnis & Fazit
+Die zweistufige Backup-Pipeline läuft vollständig jede Nacht um 03:00 Uhr. Der Speicherverbrauch im 100GB `local` -Verzeichnis ist durch das rollierende 3-Tage Fenster fest gedeckelt (ca. 14GB Gesammt-Footprint bei 4.58 GB pro ZSTD-Archiv). Durch die Kombination aus virtuellem `mysqldump`und physischem `vzdunp`ist die Wiederherstellung im Ernstfall zu 100% Konsistent und vor der Datenkorruption geschützt. 
+
 # Changelog | 03. November 2026
 
 **Thema: Netzwerk-Isolation von Uptime Kuma & Fehlerbehebung der Nextcloud-Überwachung**
